@@ -30,7 +30,7 @@ class LoginViewController: UIViewController {
                 
                 return
             }
-            self.performSegue(withIdentifier: "FromLoginToChat", sender: self)
+            self.performSegue(withIdentifier: K.loginSegue, sender: self)
           
         }
     }
