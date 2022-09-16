@@ -37,27 +37,32 @@ class ChatViewController: UIViewController {
     func loadMessages(){
         messages = []
         db.collection(K.FStore.collectionName).getDocuments { querySnapshot, error in
-            if let e = error{
-                print("There was a issue retrieiving data from Firestore \(e.localizedDescription)")
+            
+            guard error == nil else {
+                print("There was a issue retrieiving data from Firestore \(error!.localizedDescription)")
+                return
                 
-            } else {
-                if let snapshotDocuments = querySnapshot?.documents{
-                    for doc in snapshotDocuments{
-                        let data = doc.data()
-                        guard let sender = data[K.FStore.senderField] as? String else {return}
-                        guard let body = data[K.FStore.bodyField] as? String else {return}
-                        let newMessage = Message(sender: sender, body: body)
-                        self.messages.append(newMessage)
-                        
-                        DispatchQueue.main.async {
-                            self.tableView.reloadData()
-                        }
-                       
-                    }
-                }
             }
-        }
+            
+            guard let snapshotDocuments = querySnapshot?.documents else {return}
+            for doc in snapshotDocuments{
+                
+                let data = doc.data()
+                guard let sender = data[K.FStore.senderField] as? String else {return}
+                guard let body = data[K.FStore.bodyField] as? String else {return}
+                
+                let newMessage = Message(sender: sender, body: body)
+                self.messages.append(newMessage)
+                        
+                DispatchQueue.main.async {
+                    self.tableView.reloadData()
+                }
+                       
+            }
+                
+            
     }
+}
     
     @IBAction func sendPressed(_ sender: UIButton) {
         guard let messageBody = messageTextfield.text else {return}
