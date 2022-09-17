@@ -11,7 +11,7 @@ import FirebaseCore
 import FirebaseAuth
 import FirebaseFirestore
 
-class ChatViewController: UIViewController {
+class ChatViewController: UIViewController{
 
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var messageTextfield: UITextField!
@@ -25,6 +25,7 @@ class ChatViewController: UIViewController {
         title = K.appName
         navigationItem.hidesBackButton = true
         tableView.dataSource = self
+        messageTextfield.delegate = self
         
         tableView.register(UINib(nibName: K.cellNibName, bundle: nil), forCellReuseIdentifier: K.cellIdentifier)
         
@@ -67,8 +68,18 @@ class ChatViewController: UIViewController {
 }
     
     @IBAction func sendPressed(_ sender: UIButton) {
+      
+        guard messageTextfield.text != "" else {
+            let ac = UIAlertController(title: "You can't send an empty message!", message: nil, preferredStyle: .alert)
+            ac.addAction(UIAlertAction(title: "OK", style: .default))
+            present(ac, animated: true)
+            return
+        }
         guard let messageBody = messageTextfield.text else {return}
         guard let messageSender = Auth.auth().currentUser?.email else {return}
+        
+        messageTextfield.endEditing(true)
+        messageTextfield.text = ""
         
         
         db.collection(K.FStore.collectionName).addDocument(
@@ -103,6 +114,8 @@ class ChatViewController: UIViewController {
     
 }
 
+
+//MARK: - UITableViewDataSource
 extension ChatViewController: UITableViewDataSource{
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -118,6 +131,14 @@ extension ChatViewController: UITableViewDataSource{
     }
     
     
+}
+
+
+//MARK: - UITextFieldDelegate
+extension ChatViewController: UITextFieldDelegate{
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        messageTextfield.endEditing(true)
+    }
 }
 
 
